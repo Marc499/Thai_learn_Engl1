@@ -1,21 +1,27 @@
 💖 English for My Love – English Learning App with Lukas 🇹🇭 🇬🇧 🇩🇪
 ​Eine interaktive Web-App für thailändische Muttersprachlerinnen zum Englischlernen. Die App kombiniert Alltagssätze mit romantischen Beziehungsmomenten und nutzt Spaced Repetition (Karteikarten-Wiederholung) sowie einen freundlichen animierten deutschen Tutor namens Lukas.
-​🚀 Live-Demo auf GitHub Pages
-​Sobald GitHub Pages aktiviert ist, ist die App unter folgendem Link erreichbar:
-https://<DEIN-GITHUB-BENUTZERNAME>.github.io/<REPOSITORY-NAME>/
-​🛠️ Anleitung: Auf GitHub Pages veröffentlichen (In 2 Minuten)
-​GitHub Repository erstellen:
-​Gehe auf GitHub.com und erstelle ein neues öffentliches Repository (z. B. english-for-my-love).
-​Dateien hochladen:
-​Lade die Datei index.html und diese README.md direkt in den Hauptzweig (main / master) deines Repositories hoch.
-​GitHub Pages aktivieren:
-​Klicke in deinem Repository oben auf Settings (Einstellungen).
-​Wähle im linken Menü den Punkt Pages aus.
-​Wähle unter Build and deployment -> Source: Deploy from a branch.
-​Wähle als Branch main (oder master) und Ordner / (root) aus.
-​Klicke auf Save.
-​Fertig! 🎉
-​Nach etwa 1–2 Minuten ist deine App online und du erhältst den fertigen Link, den du deiner Partnerin schicken kannst!
+🚀 Live-Demo auf GitHub Pages
+Sobald der Workflow einmal gelaufen ist, ist die App hier erreichbar:
+https://marc499.github.io/Thai_learn_Engl1/
+
+🛠️ Veröffentlichen via GitHub Actions (empfohlen)
+Dieses Repository enthält den Workflow `.github/workflows/deploy-pages.yml`.
+Er lädt den Repository-Inhalt als statische Seite zu GitHub Pages hoch und
+aktiviert Pages dabei automatisch (`actions/configure-pages` mit `enablement: true`).
+Es muss also nichts im Settings-Dialog gespeichert werden.
+
+1. Diesen Branch nach `main` mergen.
+2. Unter dem Reiter **Actions** läuft „Deploy to GitHub Pages" an
+   (alternativ von Hand über **Run workflow** starten).
+3. Nach ca. 1–2 Minuten steht die URL oben im Workflow-Job und unter Settings → Pages.
+
+Falls Pages später auf „Deploy from a branch" zurückgestellt wurde: unter
+Settings → Pages als **Source** wieder **GitHub Actions** auswählen, dann greift
+der Workflow.
+
+🔁 Alternative: Deploy from a branch
+Settings → Pages → Source: „Deploy from a branch", Branch `main`, Ordner `/ (root)`, dann Save.
+Wichtig: `index.html` muss dafür im Wurzelverzeichnis von `main` liegen — das ist hier der Fall.
 ​✨ Features der App
 ​💖 Romantische & Alltags-Kategorien: 30 ausgewählte Sätze für Beziehungs- und Alltagssituationen.
 ​🔊 Audio-Ausgabe: Automatische Sprachausgabe (Text-to-Speech) für die englische Aussprache per Knopfdruck.
