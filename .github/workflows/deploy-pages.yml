@@ -24,11 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # enablement: true schaltet GitHub Pages selbst ein, falls es noch
-      # nicht aktiviert ist - deshalb muss man im Settings-Dialog nichts speichern.
+      # Voraussetzung: Unter Settings -> Pages muss als Source einmalig
+      # "GitHub Actions" ausgewaehlt sein. Der automatische GITHUB_TOKEN kann
+      # Pages nicht selbst aktivieren (dafuer waeren Admin-Rechte noetig),
+      # deshalb kein enablement: true.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:

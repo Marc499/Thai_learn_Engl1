@@ -6,18 +6,16 @@ https://marc499.github.io/Thai_learn_Engl1/
 
 🛠️ Veröffentlichen via GitHub Actions (empfohlen)
 Dieses Repository enthält den Workflow `.github/workflows/deploy-pages.yml`.
-Er lädt den Repository-Inhalt als statische Seite zu GitHub Pages hoch und
-aktiviert Pages dabei automatisch (`actions/configure-pages` mit `enablement: true`).
-Es muss also nichts im Settings-Dialog gespeichert werden.
+Er lädt den Repository-Inhalt als statische Seite zu GitHub Pages hoch.
 
-1. Diesen Branch nach `main` mergen.
-2. Unter dem Reiter **Actions** läuft „Deploy to GitHub Pages" an
+1. **Einmalig nötig:** Settings → Pages → **Source: GitHub Actions** auswählen.
+   Ohne diesen Schritt bricht der Workflow bei `actions/configure-pages` ab
+   („Create Pages site failed: Resource not accessible by integration"), denn
+   der automatische `GITHUB_TOKEN` darf Pages nicht selbst aktivieren.
+2. Diesen Branch nach `main` mergen.
+3. Unter dem Reiter **Actions** läuft „Deploy to GitHub Pages" an
    (alternativ von Hand über **Run workflow** starten).
-3. Nach ca. 1–2 Minuten steht die URL oben im Workflow-Job und unter Settings → Pages.
-
-Falls Pages später auf „Deploy from a branch" zurückgestellt wurde: unter
-Settings → Pages als **Source** wieder **GitHub Actions** auswählen, dann greift
-der Workflow.
+4. Nach ca. 1–2 Minuten steht die URL oben im Workflow-Job und unter Settings → Pages.
 
 🔁 Alternative: Deploy from a branch
 Settings → Pages → Source: „Deploy from a branch", Branch `main`, Ordner `/ (root)`, dann Save.
