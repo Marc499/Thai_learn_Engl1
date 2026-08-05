@@ -1,25 +1,24 @@
 💖 English for My Love – English Learning App with Lukas 🇹🇭 🇬🇧 🇩🇪
 ​Eine interaktive Web-App für thailändische Muttersprachlerinnen zum Englischlernen. Die App kombiniert Alltagssätze mit romantischen Beziehungsmomenten und nutzt Spaced Repetition (Karteikarten-Wiederholung) sowie einen freundlichen animierten deutschen Tutor namens Lukas.
 🚀 Live-Demo auf GitHub Pages
-Sobald der Workflow einmal gelaufen ist, ist die App hier erreichbar:
+Die App ist hier erreichbar:
 https://marc499.github.io/Thai_learn_Engl1/
 
-🛠️ Veröffentlichen via GitHub Actions (empfohlen)
-Dieses Repository enthält den Workflow `.github/workflows/deploy-pages.yml`.
-Er lädt den Repository-Inhalt als statische Seite zu GitHub Pages hoch.
+🛠️ Veröffentlichen
+Das Deployment läuft über GitHub Pages im Branch-Modus — dafür ist kein
+eigener Actions-Workflow nötig, da die App aus einer einzelnen statischen
+`index.html` besteht.
 
-1. **Einmalig nötig:** Settings → Pages → **Source: GitHub Actions** auswählen.
-   Ohne diesen Schritt bricht der Workflow bei `actions/configure-pages` ab
-   („Create Pages site failed: Resource not accessible by integration"), denn
-   der automatische `GITHUB_TOKEN` darf Pages nicht selbst aktivieren.
-2. Diesen Branch nach `main` mergen.
-3. Unter dem Reiter **Actions** läuft „Deploy to GitHub Pages" an
-   (alternativ von Hand über **Run workflow** starten).
-4. Nach ca. 1–2 Minuten steht die URL oben im Workflow-Job und unter Settings → Pages.
+Einstellung unter Settings → Pages: **Source: „Deploy from a branch"**,
+Branch `main`, Ordner `/ (root)`.
 
-🔁 Alternative: Deploy from a branch
-Settings → Pages → Source: „Deploy from a branch", Branch `main`, Ordner `/ (root)`, dann Save.
-Wichtig: `index.html` muss dafür im Wurzelverzeichnis von `main` liegen — das ist hier der Fall.
+Jeder Push auf `main` veröffentlicht die Seite danach automatisch neu; der
+Build „pages build and deployment" erscheint unter dem Reiter **Actions**
+und braucht ca. 1 Minute.
+
+Wichtig: `index.html` muss im Wurzelverzeichnis von `main` liegen — das ist
+hier der Fall. Die leere Datei `.nojekyll` verhindert, dass Jekyll die Seite
+umbaut.
 ​✨ Features der App
 ​💖 Romantische & Alltags-Kategorien: 30 ausgewählte Sätze für Beziehungs- und Alltagssituationen.
 ​🔊 Audio-Ausgabe: Automatische Sprachausgabe (Text-to-Speech) für die englische Aussprache per Knopfdruck.
