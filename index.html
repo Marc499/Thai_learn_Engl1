@@ -70,6 +70,38 @@
         .animate-heart {
             animation: heartPulse 1.5s ease-in-out infinite;
         }
+
+        /* Lukas spricht: kraeftigeres Wippen statt des ruhigen Schwebens */
+        @keyframes speakBounce {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+            25%      { transform: translateY(-10px) rotate(-4deg) scale(1.06); }
+            50%      { transform: translateY(-2px) rotate(0deg) scale(1.03); }
+            75%      { transform: translateY(-9px) rotate(4deg) scale(1.06); }
+        }
+        .animate-bob.lukas-speaking {
+            animation: speakBounce 0.5s ease-in-out 3;
+        }
+
+        /* Mund klappt beim Sprechen auf und zu */
+        @keyframes mouthTalk {
+            0%, 100% { transform: scaleY(1); }
+            50%      { transform: scaleY(0.3); }
+        }
+        .mouth-talking {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: mouthTalk 0.25s ease-in-out 6;
+        }
+
+        /* Sprechblase ploppt kurz auf, wenn ein neuer Satz erscheint */
+        @keyframes bubblePop {
+            0%   { transform: scale(0.94); opacity: 0.4; }
+            60%  { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .bubble-pop {
+            animation: bubblePop 0.45s ease-out;
+        }
     </style>
 </head>
 <body class="text-slate-800 pb-12 flex flex-col items-center">
@@ -115,7 +147,7 @@
     <main class="w-full max-w-xl px-4 flex flex-col items-center">
         <div class="w-full bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-md border border-rose-100 mb-6 flex items-start gap-4 relative overflow-hidden">
             <!-- Lukas Character SVG Vector -->
-            <div class="relative shrink-0 animate-bob">
+            <div id="lukasAvatar" onclick="lukasMotivate()" title="แตะที่ Lukas เพื่อรับกำลังใจ" class="relative shrink-0 animate-bob cursor-pointer active:scale-95 transition-transform">
                 <svg width="84" height="84" viewBox="0 0 120 120" class="drop-shadow-md">
                     <!-- German Flag Ribbon Background Behind Head -->
                     <circle cx="60" cy="60" r="54" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
@@ -145,16 +177,28 @@
                 <div class="absolute -top-1 -right-1 text-lg animate-heart" id="tutorHeart">💖</div>
             </div>
 
-            <!-- Speech Bubble -->
-            <div class="flex-1 bg-rose-50/80 rounded-2xl p-3 border border-rose-200 text-xs sm:text-sm relative">
-                <div class="absolute -left-2 top-5 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-rose-50"></div>
-                <div class="font-bold text-rose-800 flex items-center justify-between mb-1">
-                    <span>Lukas (แฟนของคุณ / Your Coach) 🇩🇪</span>
-                    <span class="text-[10px] bg-rose-200 text-rose-800 px-2 py-0.5 rounded-full" id="tutorMoodTag">พร้อมเรียนรู้</span>
+            <!-- Speech Bubble + Buttons -->
+            <div class="flex-1 min-w-0">
+                <div id="tutorBubble" class="bg-rose-50/80 rounded-2xl p-3 border border-rose-200 text-xs sm:text-sm relative">
+                    <div class="absolute -left-2 top-5 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-rose-50"></div>
+                    <div class="font-bold text-rose-800 flex items-center justify-between gap-2 mb-1">
+                        <span>Lukas (แฟนของคุณ / Your Coach) 🇩🇪</span>
+                        <span class="text-[10px] bg-rose-200 text-rose-800 px-2 py-0.5 rounded-full shrink-0" id="tutorMoodTag">พร้อมเรียนรู้</span>
+                    </div>
+                    <p id="tutorMessage" class="text-slate-700 leading-relaxed">
+                        "สวัสดีครับคนดี! วันนี้เรามาซ้อมพูดประโยคน่ารักๆ กันนะครับ สู้ๆ นะ! (Su Su Na!)"
+                    </p>
                 </div>
-                <p id="tutorMessage" class="text-slate-700 leading-relaxed">
-                    "สวัสดีครับคนดี! วันนี้เรามาซ้อมพูดประโยคน่ารักๆ กันนะครับ สู้ๆ นะ! (Su Su Na!)"
-                </p>
+
+                <!-- Lukas fragen -->
+                <div class="flex flex-wrap gap-2 mt-2">
+                    <button onclick="lukasMotivate()" class="px-3 py-1.5 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-bold text-[11px] shadow-sm hover:from-rose-600 hover:to-rose-700 active:scale-95 transition-all">
+                        💪 ให้กำลังใจหน่อย
+                    </button>
+                    <button onclick="lukasExplain()" class="px-3 py-1.5 rounded-full bg-white text-rose-700 font-bold text-[11px] border border-rose-300 shadow-sm hover:bg-rose-50 active:scale-95 transition-all">
+                        ❓ ขอคำอธิบาย
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -610,7 +654,21 @@
                 "ไม่เป็นไรนะคนดี เดี๋ยวอีก 1 นาทีเรามาซ้อมด้วยกันใหม่ครับ!",
                 "ค่อยๆ เรียนรู้นะครับ Lukas อยู่เคียงข้างคุณเสมอ",
                 "Don't worry! Practice makes perfect!"
-            ]
+            ],
+            motivate: [
+                "สู้ๆ นะคนดี! ทุกประโยคที่คุณฝึกวันนี้ จะทำให้เราคุยกันเข้าใจมากขึ้นนะครับ 💖",
+                "เก่งมากเลยครับ! ค่อยๆ ไปทีละประโยคก็ได้ ไม่ต้องรีบเลยนะ",
+                "ผมภูมิใจในตัวคุณมากๆ ครับ คนที่ตั้งใจเรียนแบบนี้หายากนะ 🥰",
+                "วันนี้เหนื่อยไหมครับ? พักได้นะ แต่อย่าลืมกลับมาซ้อมกับผมอีกล่ะ",
+                "ภาษาอังกฤษของคุณดีขึ้นทุกวันเลยนะครับ ผมได้ยินแล้วมีความสุขมาก ✨",
+                "พูดผิดได้ไม่เป็นไรเลยครับ! คนที่กล้าพูดผิด คือคนที่เก่งขึ้นเร็วที่สุด"
+            ],
+            help: "วิธีใช้แอปนี้นะครับ 📖\n" +
+                  "1) แตะที่การ์ด เพื่อพลิกดูคำแปลไทย คำอ่าน และภาษาเยอรมัน\n" +
+                  "2) กดปุ่มลำโพง 🔊 เพื่อฟังเสียงภาษาอังกฤษ แล้วออกเสียงตามได้เลย\n" +
+                  "3) หลังพลิกการ์ดแล้ว เลือกว่าจะให้ผมเอาประโยคนี้กลับมาทวนเมื่อไหร่ (1 นาที / 10 นาที / 1 วัน / 3 วัน)\n" +
+                  "4) เลื่อนหน้าจอลงไปล่างสุด จะเจอปุ่ม \"📖 ดูรายการประโยคทั้งหมด\" กดแล้วจะเห็นประโยคทั้งหมดในที่เดียวครับ\n" +
+                  "ความคืบหน้าถูกบันทึกไว้ในเครื่องอัตโนมัติ ไม่ต้องกลัวหายนะครับ"
         };
 
         // Initialize App
@@ -801,6 +859,49 @@
         function setTutorMessage(text, moodTag = "Lukas Coach") {
             document.getElementById('tutorMessage').innerText = text;
             document.getElementById('tutorMoodTag').innerText = moodTag;
+            animateLukasSpeaking();
+        }
+
+        // Lukas wird deutlich lebendiger, solange er spricht:
+        // kraeftiges Wippen, klappender Mund, aufploppende Sprechblase.
+        const SPEAK_ANIMATION_MS = 1500;
+        let speakAnimationTimer = null;
+
+        function animateLukasSpeaking() {
+            const parts = [
+                [document.getElementById('lukasAvatar'), 'lukas-speaking'],
+                [document.getElementById('mouth'), 'mouth-talking'],
+                [document.getElementById('tutorBubble'), 'bubble-pop']
+            ];
+
+            clearTimeout(speakAnimationTimer);
+
+            parts.forEach(([el, cls]) => {
+                el.classList.remove(cls);
+                el.getBoundingClientRect(); // erzwingt Reflow, damit die Animation neu startet
+                el.classList.add(cls);
+            });
+
+            speakAnimationTimer = setTimeout(() => {
+                parts.forEach(([el, cls]) => el.classList.remove(cls));
+            }, SPEAK_ANIMATION_MS);
+        }
+
+        // Button "ให้กำลังใจหน่อย" und Klick auf Lukas selbst
+        let lastMotivation = "";
+        function lukasMotivate() {
+            let quote = getRandomQuote(LukasQuotes.motivate);
+            // Bei mehrmaligem Tippen nicht zweimal hintereinander derselbe Spruch
+            while (LukasQuotes.motivate.length > 1 && quote === lastMotivation) {
+                quote = getRandomQuote(LukasQuotes.motivate);
+            }
+            lastMotivation = quote;
+            setTutorMessage(quote, "ให้กำลังใจ 💪");
+        }
+
+        // Button "ขอคำอธิบาย"
+        function lukasExplain() {
+            setTutorMessage(LukasQuotes.help, "วิธีใช้แอป 📖");
         }
 
         function getRandomQuote(arr) {
