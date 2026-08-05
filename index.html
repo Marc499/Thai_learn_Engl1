@@ -159,8 +159,8 @@
         </div>
 
         <!-- Flashcard Container -->
-        <div class="w-full perspective-1000 min-h-[320px] mb-4">
-            <div id="flashcard" onclick="flipCard()" class="w-full h-full min-h-[320px] relative transform-style-3d transition-transform duration-500 cursor-pointer shadow-xl rounded-3xl bg-white border-2 border-rose-200 p-6 flex flex-col justify-between select-none">
+        <div class="w-full perspective-1000 min-h-[380px] mb-4">
+            <div id="flashcard" onclick="flipCard()" class="w-full h-full min-h-[380px] relative transform-style-3d transition-transform duration-500 cursor-pointer shadow-xl rounded-3xl bg-white border-2 border-rose-200 p-6 flex flex-col justify-between select-none">
                 
                 <!-- Front Side -->
                 <div class="absolute inset-0 backface-hidden p-6 flex flex-col justify-between bg-gradient-to-br from-white via-rose-50/30 to-rose-100/40 rounded-3xl">
@@ -199,6 +199,14 @@
                     </div>
 
                     <div class="my-auto text-center space-y-3 py-2">
+                        <!-- English Sentence (repeated from the front) -->
+                        <div class="pb-2 border-b border-slate-100">
+                            <div class="text-xs text-slate-400 font-medium mb-0.5">English:</div>
+                            <div id="cardEnBack" class="text-lg sm:text-xl font-extrabold text-slate-800 leading-snug">
+                                I miss you so much.
+                            </div>
+                        </div>
+
                         <!-- Thai Meaning -->
                         <div>
                             <div class="text-xs text-rose-400 font-medium mb-0.5">ภาษาไทย (Meaning):</div>
@@ -686,6 +694,7 @@
             // Populate Card Data
             document.getElementById('cardCategoryBadge').innerText = card.category === 'romantic' ? '💖 Romantisch' : '☀️ Alltag';
             document.getElementById('cardEn').innerText = card.en;
+            document.getElementById('cardEnBack').innerText = card.en;
             document.getElementById('cardTh').innerText = card.th;
             document.getElementById('cardThPhonetic').innerText = `"${card.thPhonetic}"`;
             document.getElementById('cardDe').innerText = card.de;
