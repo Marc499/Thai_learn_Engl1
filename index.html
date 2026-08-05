@@ -663,11 +663,30 @@
                 "ภาษาอังกฤษของคุณดีขึ้นทุกวันเลยนะครับ ผมได้ยินแล้วมีความสุขมาก ✨",
                 "พูดผิดได้ไม่เป็นไรเลยครับ! คนที่กล้าพูดผิด คือคนที่เก่งขึ้นเร็วที่สุด"
             ],
+            // Geraet hat gar keine Sprachausgabe - typisch fuer In-App-Browser (LINE, Facebook)
+            noSpeechSupport: "เบราว์เซอร์นี้อ่านออกเสียงไม่ได้ครับ 🔇\n" +
+                             "ถ้าคุณเปิดลิงก์จากใน LINE หรือ Facebook ให้กดจุดสามจุดมุมขวาบน " +
+                             "แล้วเลือก \"เปิดในเบราว์เซอร์\" (Chrome) แล้วลองใหม่นะครับ",
+
+            // Sprachausgabe vorhanden, aber keine englische Stimme installiert
+            noEnglishVoice: "เครื่องของคุณยังไม่มีเสียงภาษาอังกฤษติดตั้งอยู่ครับ เลยยังฟังเสียงอ่านไม่ได้ 🔇\n" +
+                            "วิธีติดตั้ง: ตั้งค่า → การจัดการทั่วไป (บางรุ่นคือ ระบบ) → ข้อความเป็นคำพูด " +
+                            "→ Google ข้อความเป็นคำพูด → ติดตั้งข้อมูลเสียง → เลือก English (United States) แล้วกดดาวน์โหลด\n" +
+                            "เสร็จแล้วเปิดหน้านี้ใหม่อีกครั้งนะครับ 💖",
+
+            // speak() wurde angenommen, aber es kam nie Ton
+            noSound: "ถ้ายังไม่ได้ยินเสียง ลองเช็คดูนะครับ 🔇\n" +
+                     "1) กดปุ่มเพิ่มเสียงข้างเครื่อง แล้วดูว่าแถบ \"สื่อ (Media)\" ไม่ได้ปิดอยู่\n" +
+                     "2) ถ้าเปิดจากใน LINE หรือ Facebook ให้กดจุดสามจุดมุมขวาบน แล้วเลือก \"เปิดในเบราว์เซอร์\" (Chrome)\n" +
+                     "3) ถ้าต่อหูฟังบลูทูธอยู่ ลองถอดออกก่อนนะครับ",
+
             help: "วิธีใช้แอปนี้นะครับ 📖\n" +
                   "1) แตะที่การ์ด เพื่อพลิกดูคำแปลไทย คำอ่าน และภาษาเยอรมัน\n" +
                   "2) กดปุ่มลำโพง 🔊 เพื่อฟังเสียงภาษาอังกฤษ แล้วออกเสียงตามได้เลย\n" +
                   "3) หลังพลิกการ์ดแล้ว เลือกว่าจะให้ผมเอาประโยคนี้กลับมาทวนเมื่อไหร่ (1 นาที / 10 นาที / 1 วัน / 3 วัน)\n" +
                   "4) เลื่อนหน้าจอลงไปล่างสุด จะเจอปุ่ม \"📖 ดูรายการประโยคทั้งหมด\" กดแล้วจะเห็นประโยคทั้งหมดในที่เดียวครับ\n" +
+                  "5) ถ้าไม่ได้ยินเสียง: กดปุ่มเพิ่มเสียงข้างเครื่องแล้วเช็คแถบ \"สื่อ (Media)\" " +
+                  "และควรเปิดหน้านี้ใน Chrome ไม่ใช่ในแอป LINE นะครับ\n" +
                   "ความคืบหน้าถูกบันทึกไว้ในเครื่องอัตโนมัติ ไม่ต้องกลัวหายนะครับ"
         };
 
@@ -783,10 +802,13 @@
                 document.getElementById('preFlipControls').classList.add('hidden');
 
                 // Play pronunciation automatically on flip
-                speakCurrent();
+                const spoken = speakCurrent();
 
-                // Tutor quote
-                setTutorMessage(getRandomQuote(LukasQuotes.flip), "กำลังซ้อมพูด");
+                // Tutor quote - nur wenn die Aussprache lief. Sonst steht in der
+                // Sprechblase der Hinweis, warum kein Ton kommt.
+                if (spoken) {
+                    setTutorMessage(getRandomQuote(LukasQuotes.flip), "กำลังซ้อมพูด");
+                }
             } else {
                 flashcard.classList.remove('rotate-y-180');
                 document.getElementById('srsControls').classList.add('hidden');
@@ -834,13 +856,33 @@
         }
 
         // Text To Speech (Web Speech API - English Pronunciation)
+        // Bleibt die Ausgabe stumm, erklaert Lukas den Grund auf Thai, statt dass
+        // einfach nichts passiert. Gibt true zurueck, wenn gesprochen werden konnte.
+        let silentSpeechTimer = null;
+
         function speakCurrent(event) {
             if (event) event.stopPropagation();
 
             const filtered = getFilteredCards();
             const card = filtered[currentIndex];
 
-            if ('speechSynthesis' in window) {
+            // In-App-Browser (LINE, Facebook) bringen die Schnittstelle teils gar nicht mit
+            if (!('speechSynthesis' in window)) {
+                setTutorMessage(LukasQuotes.noSpeechSupport, "เปิดเสียงไม่ได้ 🔇");
+                return false;
+            }
+
+            // Auf vielen Handys in Thailand ist nur die thailaendische Stimme installiert.
+            // getVoices() ist direkt nach dem Laden noch leer - dann nicht vorschnell warnen,
+            // sondern den Sprechversuch unternehmen.
+            const voices = window.speechSynthesis.getVoices();
+            const englishVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+            if (voices.length > 0 && !englishVoice) {
+                setTutorMessage(LukasQuotes.noEnglishVoice, "ยังไม่มีเสียงอังกฤษ 🔇");
+                return false;
+            }
+
+            try {
                 // Cancel previous speech
                 window.speechSynthesis.cancel();
 
@@ -849,9 +891,31 @@
                 utterance.rate = 0.88; // Slightly slower for clarity
                 utterance.pitch = 1.0;
 
+                // Die konkrete Stimme ist nur eine Praeferenz - laesst sie sich nicht
+                // setzen, genuegt dem Geraet die Sprachangabe oben.
+                if (englishVoice) {
+                    try { utterance.voice = englishVoice; } catch (e) { /* lang reicht */ }
+                }
+
+                // Faengt den Fall ab, dass speak() zwar angenommen wird, aber nie Ton kommt
+                // (stumme Medienlautstaerke, In-App-Browser, Bluetooth-Kopfhoerer).
+                clearTimeout(silentSpeechTimer);
+                silentSpeechTimer = setTimeout(() => {
+                    setTutorMessage(LukasQuotes.noSound, "ไม่ได้ยินเสียงหรือเปล่า? 🔇");
+                }, 1500);
+                utterance.onstart = () => clearTimeout(silentSpeechTimer);
+                utterance.onerror = () => {
+                    clearTimeout(silentSpeechTimer);
+                    setTutorMessage(LukasQuotes.noSound, "ไม่ได้ยินเสียงหรือเปล่า? 🔇");
+                };
+
                 window.speechSynthesis.speak(utterance);
-            } else {
-                alert("อุปกรณ์ของคุณไม่รองรับการออกเสียงอัตโนมัติ");
+                return true;
+            } catch (err) {
+                // Lieber eine Erklaerung als eine App, die wortlos stehen bleibt
+                clearTimeout(silentSpeechTimer);
+                setTutorMessage(LukasQuotes.noSound, "ไม่ได้ยินเสียงหรือเปล่า? 🔇");
+                return false;
             }
         }
 
