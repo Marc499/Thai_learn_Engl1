@@ -141,6 +141,16 @@
                 ☀️ ประจำวัน (Daily)
             </button>
         </div>
+
+        <!-- Lernrichtung: welche Sprache steht vorne auf der Karte? -->
+        <div class="flex bg-amber-200/40 p-1 rounded-xl gap-1">
+            <button onclick="setDirection('th-en')" id="dir-th-en" class="flex-1 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all bg-white text-amber-700 shadow-sm">
+                🇹🇭 ไทย ➔ อังกฤษ
+            </button>
+            <button onclick="setDirection('en-th')" id="dir-en-th" class="flex-1 py-2 text-xs md:text-sm font-semibold rounded-lg text-slate-600 hover:text-amber-700 transition-all">
+                🇬🇧 อังกฤษ ➔ ไทย
+            </button>
+        </div>
     </header>
 
     <!-- Animated German Character "Lukas" & Coach Bubble -->
@@ -212,24 +222,24 @@
                         <span id="cardCategoryBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-700">
                             💖 Romantisch
                         </span>
-                        <span class="text-xs font-semibold text-slate-400">แตะเพื่อพลิกดูคำแปล 🔄</span>
+                        <span id="cardFrontFlipHint" class="text-xs font-semibold text-slate-400">แตะเพื่อพลิกดูคำแปล 🔄</span>
                     </div>
 
                     <div class="my-auto text-center py-4">
-                        <!-- Speaker Button -->
-                        <button onclick="speakCurrent(event)" class="inline-flex items-center justify-center w-12 h-12 mb-3 rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 hover:scale-105 active:scale-95 transition-all">
+                        <!-- Speaker Button - bei ไทย ➔ อังกฤษ ausgeblendet, sonst verraet er die Antwort -->
+                        <button id="cardFrontSpeaker" onclick="speakCurrent(event)" class="inline-flex items-center justify-center w-12 h-12 mb-3 rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 hover:scale-105 active:scale-95 transition-all">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
                         </button>
 
-                        <!-- English Text -->
+                        <!-- Abgefragter Satz: je nach Lernrichtung Thai oder Englisch -->
                         <h2 id="cardEn" class="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-snug mb-2">
-                            I miss you so much.
+                            ฉันคิดถึงคุณมากนะ
                         </h2>
-                        <p class="text-xs text-slate-400 font-medium">กดปุ่มลำโพงเพื่อฟังเสียงพูดภาษาอังกฤษ</p>
+                        <p id="cardFrontSub" class="text-xs text-slate-400 font-medium">แล้วภาษาอังกฤษพูดว่ายังไงนะ? 🤔</p>
                     </div>
 
-                    <div class="text-center text-xs text-rose-500 font-medium animate-pulse">
-                        👆 Click card to reveal meaning & audio
+                    <div id="cardFrontFooter" class="text-center text-xs text-rose-500 font-medium animate-pulse">
+                        👆 แตะการ์ดเพื่อดูคำตอบภาษาอังกฤษ
                     </div>
                 </div>
 
@@ -243,9 +253,9 @@
                     </div>
 
                     <div class="my-auto text-center space-y-3 py-2">
-                        <!-- English Sentence (repeated from the front) -->
-                        <div class="pb-2 border-b border-slate-100">
-                            <div class="text-xs text-slate-400 font-medium mb-0.5">English:</div>
+                        <!-- Englischer Satz - bei ไทย ➔ อังกฤษ ist er die Antwort und wird hervorgehoben -->
+                        <div id="cardEnBackBox" class="pb-2 border-b border-slate-100">
+                            <div id="cardEnBackLabel" class="text-xs text-slate-400 font-medium mb-0.5">English:</div>
                             <div id="cardEnBack" class="text-lg sm:text-xl font-extrabold text-slate-800 leading-snug">
                                 I miss you so much.
                             </div>
@@ -632,6 +642,9 @@
         let currentIndex = 0;
         let isFlipped = false;
         let learnedSet = new Set();
+        // Lernrichtung: 'th-en' fragt vom Thailaendischen ins Englische (Standard),
+        // 'en-th' zeigt wie frueher den englischen Satz zuerst.
+        let learnDirection = 'th-en';
 
         // Lukas Coach Feedback Messages
         const LukasQuotes = {
@@ -681,7 +694,9 @@
                      "3) ถ้าต่อหูฟังบลูทูธอยู่ ลองถอดออกก่อนนะครับ",
 
             help: "วิธีใช้แอปนี้นะครับ 📖\n" +
-                  "1) แตะที่การ์ด เพื่อพลิกดูคำแปลไทย คำอ่าน และภาษาเยอรมัน\n" +
+                  "0) ปุ่มด้านบน \"🇹🇭 ไทย ➔ อังกฤษ\" คือให้คุณลองนึกประโยคภาษาอังกฤษเองก่อน " +
+                  "ถ้าอยากดูภาษาอังกฤษก่อนแล้วค่อยดูคำแปล ให้กด \"🇬🇧 อังกฤษ ➔ ไทย\" ครับ\n" +
+                  "1) แตะที่การ์ด เพื่อพลิกดูคำตอบ คำอ่าน และภาษาเยอรมัน\n" +
                   "2) กดปุ่มลำโพง 🔊 เพื่อฟังเสียงภาษาอังกฤษ แล้วออกเสียงตามได้เลย\n" +
                   "3) หลังพลิกการ์ดแล้ว เลือกว่าจะให้ผมเอาประโยคนี้กลับมาทวนเมื่อไหร่ (1 นาที / 10 นาที / 1 วัน / 3 วัน)\n" +
                   "4) เลื่อนหน้าจอลงไปล่างสุด จะเจอปุ่ม \"📖 ดูรายการประโยคทั้งหมด\" กดแล้วจะเห็นประโยคทั้งหมดในที่เดียวครับ\n" +
@@ -693,6 +708,7 @@
         // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
             loadProgress();
+            updateDirectionTabs();
             renderCard();
             updateStats();
             populateListModal();
@@ -716,6 +732,12 @@
 
             if (savedLearned) {
                 learnedSet = new Set(JSON.parse(savedLearned));
+            }
+
+            // Gewaehlte Lernrichtung wiederherstellen; ohne Eintrag bleibt es bei ไทย ➔ อังกฤษ
+            const savedDirection = localStorage.getItem('lukas_english_direction');
+            if (savedDirection === 'en-th' || savedDirection === 'th-en') {
+                learnDirection = savedDirection;
             }
         }
 
@@ -750,6 +772,66 @@
             renderCard();
         }
 
+        // Lernrichtung umschalten: welche Sprache steht vorne auf der Karte?
+        function setDirection(dir) {
+            learnDirection = dir;
+            isFlipped = false;
+            localStorage.setItem('lukas_english_direction', dir);
+            updateDirectionTabs();
+            renderCard();
+        }
+
+        function updateDirectionTabs() {
+            ['th-en', 'en-th'].forEach(d => {
+                const btn = document.getElementById(`dir-${d}`);
+                if (d === learnDirection) {
+                    btn.className = "flex-1 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all bg-white text-amber-700 shadow-sm";
+                } else {
+                    btn.className = "flex-1 py-2 text-xs md:text-sm font-semibold rounded-lg text-slate-600 hover:text-amber-700 transition-all";
+                }
+            });
+        }
+
+        // Vorder- und Rueckseite an die gewaehlte Lernrichtung anpassen
+        function applyDirectionToCard(card) {
+            const front = document.getElementById('cardEn');
+            const speaker = document.getElementById('cardFrontSpeaker');
+            const sub = document.getElementById('cardFrontSub');
+            const flipHint = document.getElementById('cardFrontFlipHint');
+            const footer = document.getElementById('cardFrontFooter');
+            const backBox = document.getElementById('cardEnBackBox');
+            const backLabel = document.getElementById('cardEnBackLabel');
+            const backText = document.getElementById('cardEnBack');
+
+            if (learnDirection === 'th-en') {
+                // Thai vorne, englische Antwort erst nach dem Umdrehen.
+                front.innerText = card.th;
+                sub.innerText = "แล้วภาษาอังกฤษพูดว่ายังไงนะ? 🤔";
+                flipHint.innerText = "แตะเพื่อดูคำตอบ 🔄";
+                footer.innerText = "👆 แตะการ์ดเพื่อดูคำตอบภาษาอังกฤษ";
+                // Der Lautsprecher spricht Englisch - vorne wuerde er die Antwort verraten
+                speaker.classList.add('hidden');
+
+                // Auf der Rueckseite ist der englische Satz die Aufloesung
+                backBox.className = "pb-2 mb-1 border-b-2 border-rose-200 bg-rose-50/60 rounded-xl p-2";
+                backLabel.className = "text-xs text-rose-500 font-semibold mb-0.5";
+                backLabel.innerText = "คำตอบภาษาอังกฤษ (English):";
+                backText.className = "text-2xl sm:text-3xl font-extrabold text-rose-700 leading-snug";
+            } else {
+                // Wie zuvor: englischer Satz vorne, thailaendische Bedeutung hinten.
+                front.innerText = card.en;
+                sub.innerText = "กดปุ่มลำโพงเพื่อฟังเสียงพูดภาษาอังกฤษ";
+                flipHint.innerText = "แตะเพื่อพลิกดูคำแปล 🔄";
+                footer.innerText = "👆 แตะการ์ดเพื่อดูคำแปลและฟังเสียง";
+                speaker.classList.remove('hidden');
+
+                backBox.className = "pb-2 border-b border-slate-100";
+                backLabel.className = "text-xs text-slate-400 font-medium mb-0.5";
+                backLabel.innerText = "English:";
+                backText.className = "text-lg sm:text-xl font-extrabold text-slate-800 leading-snug";
+            }
+        }
+
         // Render current card content
         function renderCard() {
             const filtered = getFilteredCards();
@@ -770,9 +852,9 @@
 
             // Populate Card Data
             document.getElementById('cardCategoryBadge').innerText = card.category === 'romantic' ? '💖 Romantisch' : '☀️ Alltag';
-            document.getElementById('cardEn').innerText = card.en;
             document.getElementById('cardEnBack').innerText = card.en;
             document.getElementById('cardTh').innerText = card.th;
+            applyDirectionToCard(card); // fuellt die Vorderseite je nach Lernrichtung
             document.getElementById('cardThPhonetic').innerText = `"${card.thPhonetic}"`;
             document.getElementById('cardDe').innerText = card.de;
             document.getElementById('cardTip').innerText = card.tip;
