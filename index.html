@@ -116,11 +116,11 @@
                     <p class="text-xs text-slate-500">เรียนภาษาอังกฤษเพื่อความรักและชีวิตประจำวัน</p>
                 </div>
             </div>
-            <!-- Streak & Stats -->
-            <div class="flex items-center space-x-3 text-xs font-semibold">
+            <!-- Streak & Stats: beide Chips oeffnen den Fortschrittsbericht -->
+            <div onclick="toggleReport()" class="flex items-center space-x-3 text-xs font-semibold cursor-pointer active:scale-95 transition-transform" title="ดูรายงานการเรียน">
                 <div class="bg-amber-100 text-amber-800 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-sm">
                     <span>🔥</span>
-                    <span id="streakCount">1</span> วัน
+                    <span id="streakCount">0</span> วัน
                 </div>
                 <div class="bg-rose-100 text-rose-800 px-2.5 py-1.5 rounded-xl flex items-center gap-1 shadow-sm">
                     <span>💖</span>
@@ -128,6 +128,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Erfolgs-Banner: Rang und Fleiss auf einen Blick, tippen oeffnet den Bericht -->
+        <button onclick="toggleReport()" class="w-full bg-white/80 backdrop-blur-md rounded-2xl p-3 shadow-sm border border-rose-100 mb-4 flex items-center gap-3 text-left hover:bg-white transition-all active:scale-[0.99]">
+            <span id="rankEmoji" class="text-3xl shrink-0">🌱</span>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span id="rankTitle" class="font-bold text-sm text-rose-800">นักเรียนใหม่</span>
+                    <span id="rankDiligence" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 shrink-0">😴 ยังไม่ได้ซ้อมเลย</span>
+                </div>
+                <div class="w-full h-1.5 bg-rose-100 rounded-full mt-1.5 overflow-hidden">
+                    <div id="rankBar" class="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-full transition-all duration-500" style="width:0%"></div>
+                </div>
+                <div id="rankNext" class="text-[10px] text-slate-500 mt-1">เริ่มซ้อมประโยคแรกกันเลย!</div>
+            </div>
+            <span class="text-[11px] text-rose-500 font-bold shrink-0">ดูรายงาน ➔</span>
+        </button>
 
         <!-- Category Tabs -->
         <div class="flex bg-rose-200/50 p-1 rounded-xl gap-1 mb-2">
@@ -351,6 +367,79 @@
                 </div>
                 <div id="cardListContainer" class="flex-1 overflow-y-auto space-y-2.5 pr-1">
                     <!-- Cards dynamically populated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Fortschrittsbericht: beantwortet "wie fleissig?" und "was hast du gelernt?" -->
+        <div id="reportModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex justify-center items-end sm:items-center p-0 sm:p-4 hidden">
+            <div class="bg-white w-full max-w-xl h-[88vh] sm:h-[700px] rounded-t-3xl sm:rounded-3xl p-5 flex flex-col shadow-2xl border border-rose-100">
+                <div class="flex justify-between items-center mb-3 pb-2 border-b">
+                    <h3 class="font-bold text-rose-800 text-base flex items-center gap-2">
+                        <span>📊</span> รายงานการเรียนของฉัน
+                    </h3>
+                    <button onclick="toggleReport()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">✕</button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto pr-1 space-y-4">
+
+                    <!-- Rang: "ich habe etwas dazugelernt" -->
+                    <div class="bg-gradient-to-br from-rose-50 to-amber-50 rounded-2xl p-4 border border-rose-200 text-center">
+                        <div id="reportRankEmoji" class="text-5xl mb-1">🌱</div>
+                        <div class="text-[11px] text-slate-500 font-medium">ระดับของฉันตอนนี้</div>
+                        <div id="reportRankTitle" class="font-extrabold text-lg text-rose-800 leading-tight">นักเรียนใหม่</div>
+                        <div id="reportRankDe" class="text-[11px] text-slate-500 italic mb-3">Neuling</div>
+                        <div class="w-full h-2.5 bg-white rounded-full overflow-hidden border border-rose-100">
+                            <div id="reportRankBar" class="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-full transition-all duration-500" style="width:0%"></div>
+                        </div>
+                        <div id="reportRankNext" class="text-[11px] text-rose-700 font-semibold mt-2">เริ่มซ้อมประโยคแรกกันเลย!</div>
+                    </div>
+
+                    <!-- Fleiss: "wie fleissig hast du gelernt?" -->
+                    <div class="bg-white rounded-2xl p-4 border border-amber-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold text-amber-800 flex items-center gap-1">💪 ความขยันของฉัน</span>
+                            <span id="reportDiligenceTag" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">😴 ยังไม่ได้ซ้อมเลย</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500 font-medium mb-2">7 วันที่ผ่านมา (ซ้อมวันไหนบ้าง)</div>
+                        <div id="reportWeekDots" class="flex justify-between gap-1 mb-3">
+                            <!-- dynamisch: ein Punkt pro Tag -->
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-amber-50 rounded-xl p-2 border border-amber-100">
+                                <div id="reportStreak" class="font-extrabold text-lg text-amber-700">0</div>
+                                <div class="text-[10px] text-slate-500 leading-tight">วันต่อเนื่อง 🔥</div>
+                            </div>
+                            <div class="bg-rose-50 rounded-xl p-2 border border-rose-100">
+                                <div id="reportDaysActive" class="font-extrabold text-lg text-rose-700">0</div>
+                                <div class="text-[10px] text-slate-500 leading-tight">วันที่ซ้อม (จาก 7)</div>
+                            </div>
+                            <div class="bg-emerald-50 rounded-xl p-2 border border-emerald-100">
+                                <div id="reportWeekReviews" class="font-extrabold text-lg text-emerald-700">0</div>
+                                <div class="text-[10px] text-slate-500 leading-tight">ครั้งที่ซ้อม (7 วัน)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zuletzt gelernt: "und was hast du gelernt?" -->
+                    <div class="bg-white rounded-2xl p-4 border border-emerald-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-emerald-800 flex items-center gap-1">✅ ประโยคที่เพิ่งเรียนล่าสุด</span>
+                            <span id="reportLearnedTotal" class="text-[11px] font-bold text-emerald-700">0/30</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500 font-medium mb-2">เรียงจากใหม่ไปเก่า พร้อมบอกว่าเรียนเมื่อไหร่</div>
+                        <div id="reportRecentList" class="space-y-2">
+                            <!-- dynamisch: zuletzt gemeisterte Saetze -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bericht zum Teilen: sie kann ihn Lukas direkt schicken -->
+                <div class="pt-3 mt-1 border-t">
+                    <button onclick="copyReport()" class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-white font-bold text-sm shadow-md hover:from-rose-600 hover:to-rose-700 transition-all flex items-center justify-center gap-2">
+                        <span>📋</span> <span id="copyReportLabel">คัดลอกรายงานส่งให้ลูคัส</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -646,6 +735,38 @@
         // 'en-th' zeigt wie frueher den englischen Satz zuerst.
         let learnDirection = 'th-en';
 
+        // Damit die Frage "wie fleissig hast du gelernt?" beantwortbar wird, braucht
+        // die App ein Gedaechtnis mit zwei Teilen:
+        // activityLog: pro Kalendertag die Anzahl bewerteter Karten -> Fleiss & Serie
+        // learnHistory: welcher Satz wann gemeistert wurde -> "was habe ich gelernt?"
+        let activityLog = {};
+        let learnHistory = [];
+
+        // Rangleiter: Titel, die man erreichen moechte und herzeigen kann.
+        // Die Schwelle bezieht sich auf die Anzahl gemeisterter Saetze.
+        const RANKS = [
+            { min: 0,  emoji: '🌱', th: 'นักเรียนใหม่',               de: 'Neuling' },
+            { min: 2,  emoji: '🌸', th: 'ดอกไม้เริ่มบาน',            de: 'Die Blume beginnt zu blühen' },
+            { min: 5,  emoji: '✨', th: 'ดาวรุ่งดวงใหม่',            de: 'Neuer aufgehender Stern' },
+            { min: 9,  emoji: '💪', th: 'คนขยันตัวจริง',              de: 'Die wirklich Fleißige' },
+            { min: 14, emoji: '💖', th: 'คนเก่งของลูคัส',            de: 'Lukas’ Kluge' },
+            { min: 20, emoji: '🌟', th: 'ซุปเปอร์สตาร์ภาษาอังกฤษ', de: 'Englisch-Superstar' },
+            { min: 26, emoji: '👑', th: 'เจ้าหญิงภาษาอังกฤษ',       de: 'Englisch-Prinzessin' },
+            { min: 30, emoji: '🏆', th: 'ราชินีภาษาอังกฤษ',          de: 'Englisch-Königin' }
+        ];
+
+        // Fleiss-Stufen nach Uebungstagen innerhalb der letzten 7 Tage
+        const DILIGENCE_LEVELS = [
+            { min: 0, emoji: '😴', th: 'ยังไม่ได้ซ้อมเลย', de: 'noch nicht geübt' },
+            { min: 1, emoji: '🌱', th: 'เริ่มต้นแล้ว',      de: 'angefangen' },
+            { min: 2, emoji: '🙂', th: 'ขยันพอใช้',         de: 'ganz fleißig' },
+            { min: 3, emoji: '💪', th: 'ขยันดีมาก',         de: 'sehr fleißig' },
+            { min: 5, emoji: '🔥', th: 'ขยันสุดๆ',          de: 'super fleißig' },
+            { min: 7, emoji: '🏅', th: 'ขยันทุกวันเลย!',    de: 'jeden Tag geübt!' }
+        ];
+
+        const THAI_WEEKDAYS = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+
         // Lukas Coach Feedback Messages
         const LukasQuotes = {
             start: [
@@ -700,7 +821,9 @@
                   "2) กดปุ่มลำโพง 🔊 เพื่อฟังเสียงภาษาอังกฤษ แล้วออกเสียงตามได้เลย\n" +
                   "3) หลังพลิกการ์ดแล้ว เลือกว่าจะให้ผมเอาประโยคนี้กลับมาทวนเมื่อไหร่ (1 นาที / 10 นาที / 1 วัน / 3 วัน)\n" +
                   "4) เลื่อนหน้าจอลงไปล่างสุด จะเจอปุ่ม \"📖 ดูรายการประโยคทั้งหมด\" กดแล้วจะเห็นประโยคทั้งหมดในที่เดียวครับ\n" +
-                  "5) ถ้าไม่ได้ยินเสียง: กดปุ่มเพิ่มเสียงข้างเครื่องแล้วเช็คแถบ \"สื่อ (Media)\" " +
+                  "5) แถบระดับด้านบน (หรือปุ่ม 🔥 กับ 💖) กดได้นะ จะเห็น \"📊 รายงานการเรียน\" ว่าคุณขยันแค่ไหน " +
+                  "ซ้อมต่อเนื่องมากี่วัน และเพิ่งเรียนประโยคไหนไปล่าสุด กดปุ่มคัดลอกแล้วส่งให้ลูคัสดูได้เลยครับ 💖\n" +
+                  "6) ถ้าไม่ได้ยินเสียง: กดปุ่มเพิ่มเสียงข้างเครื่องแล้วเช็คแถบ \"สื่อ (Media)\" " +
                   "และควรเปิดหน้านี้ใน Chrome ไม่ใช่ในแอป LINE นะครับ\n" +
                   "ความคืบหน้าถูกบันทึกไว้ในเครื่องอัตโนมัติ ไม่ต้องกลัวหายนะครับ"
         };
@@ -739,12 +862,146 @@
             if (savedDirection === 'en-th' || savedDirection === 'th-en') {
                 learnDirection = savedDirection;
             }
+
+            // Fleiss-Gedaechtnis laden. Beschaedigte Eintraege werden verworfen,
+            // damit ein defekter Speicher nie den Start der App blockiert.
+            try {
+                const savedActivity = localStorage.getItem('lukas_english_activity');
+                if (savedActivity) {
+                    const parsed = JSON.parse(savedActivity);
+                    if (parsed && typeof parsed === 'object') activityLog = parsed;
+                }
+            } catch (e) {
+                activityLog = {};
+            }
+
+            try {
+                const savedHistory = localStorage.getItem('lukas_english_history');
+                if (savedHistory) {
+                    const parsed = JSON.parse(savedHistory);
+                    if (Array.isArray(parsed)) learnHistory = parsed;
+                }
+            } catch (e) {
+                learnHistory = [];
+            }
+
+            // Wer die App schon vor diesem Update benutzt hat, hat gemeisterte Saetze
+            // ohne Zeitstempel. Die kommen ohne Datum in die Liste, damit die Anzeige
+            // nicht leer wirkt, obwohl schon gelernt wurde.
+            if (learnHistory.length === 0 && learnedSet.size > 0) {
+                learnHistory = Array.from(learnedSet).map(id => ({ id, ts: null }));
+            }
         }
 
         // Save progress to localStorage
         function saveProgress() {
             localStorage.setItem('lukas_english_cards', JSON.stringify(cards));
             localStorage.setItem('lukas_english_learned', JSON.stringify(Array.from(learnedSet)));
+            localStorage.setItem('lukas_english_activity', JSON.stringify(activityLog));
+            localStorage.setItem('lukas_english_history', JSON.stringify(learnHistory));
+        }
+
+        // ---- Erfolgs- und Fleisszustand -------------------------------------
+
+        // Lokaler Tagesschluessel (YYYY-MM-DD). Absichtlich nicht UTC: entscheidend
+        // ist der Kalendertag der Lernerin, nicht der Zeitzone des Servers.
+        function dayKey(date) {
+            const pad = n => String(n).padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+        }
+
+        // Wird bei jeder Bewertung aufgerufen und haelt fest, dass heute geuebt wurde.
+        function recordActivity(card, becameMastered) {
+            const today = dayKey(new Date());
+            activityLog[today] = (activityLog[today] || 0) + 1;
+
+            if (becameMastered) {
+                // Ein erneut gemeisterter Satz rutscht nach oben statt sich zu doppeln
+                learnHistory = learnHistory.filter(entry => entry.id !== card.id);
+                learnHistory.unshift({ id: card.id, ts: Date.now() });
+                learnHistory = learnHistory.slice(0, 50);
+            }
+        }
+
+        // Aktueller Rang plus der naechste, damit ein Ziel sichtbar bleibt
+        function getRankInfo() {
+            const mastered = learnedSet.size;
+            let currentIdx = 0;
+            RANKS.forEach((rank, idx) => {
+                if (mastered >= rank.min) currentIdx = idx;
+            });
+
+            const current = RANKS[currentIdx];
+            const next = RANKS[currentIdx + 1] || null;
+            const span = next ? next.min - current.min : 1;
+            const progress = next
+                ? Math.min(100, Math.round(((mastered - current.min) / span) * 100))
+                : 100;
+
+            return { mastered, current, next, progress, remaining: next ? next.min - mastered : 0 };
+        }
+
+        // Die letzten 7 Tage einschliesslich heute, aeltester Tag zuerst
+        function getLast7Days() {
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const key = dayKey(date);
+                days.push({
+                    key,
+                    count: activityLog[key] || 0,
+                    label: THAI_WEEKDAYS[date.getDay()],
+                    isToday: i === 0
+                });
+            }
+            return days;
+        }
+
+        // Serie zusammenhaengender Uebungstage. Ein heute noch leerer Tag beendet die
+        // Serie nicht - sonst stuende die Anzeige jeden Morgen wieder auf null.
+        function computeStreak() {
+            const cursor = new Date();
+            if (!activityLog[dayKey(cursor)]) {
+                cursor.setDate(cursor.getDate() - 1);
+                if (!activityLog[dayKey(cursor)]) return 0;
+            }
+
+            let streak = 0;
+            while (activityLog[dayKey(cursor)]) {
+                streak++;
+                cursor.setDate(cursor.getDate() - 1);
+            }
+            return streak;
+        }
+
+        function getDiligence() {
+            const week = getLast7Days();
+            const daysActive = week.filter(day => day.count > 0).length;
+            const reviews = week.reduce((sum, day) => sum + day.count, 0);
+
+            let level = DILIGENCE_LEVELS[0];
+            DILIGENCE_LEVELS.forEach(entry => {
+                if (daysActive >= entry.min) level = entry;
+            });
+
+            return { week, daysActive, reviews, level };
+        }
+
+        // Zeitangabe auf Thai, damit "wann war das?" ohne Datumsrechnen klar ist
+        function formatTimeAgo(ts) {
+            if (!ts) return 'ก่อนหน้านี้';
+
+            const minutes = Math.floor((Date.now() - ts) / 60000);
+            if (minutes < 1) return 'เมื่อสักครู่';
+            if (minutes < 60) return `${minutes} นาทีที่แล้ว`;
+
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
+
+            const days = Math.floor(hours / 24);
+            if (days === 1) return 'เมื่อวาน';
+            return `${days} วันที่แล้ว`;
         }
 
         // Get filtered cards based on active category
@@ -908,7 +1165,11 @@
             currentCard.nextReview = now + (minutes * 60 * 1000);
             currentCard.reviewInterval = minutes;
 
-            if (minutes >= 1440) {
+            // Rang vor der Bewertung merken, um einen Aufstieg erkennen zu koennen
+            const rankBefore = getRankInfo().current;
+            const becameMastered = minutes >= 1440;
+
+            if (becameMastered) {
                 currentCard.status = 'mastered';
                 learnedSet.add(currentCard.id);
                 setTutorMessage(getRandomQuote(LukasQuotes.rateEasy), "เก่งมากๆ!");
@@ -917,8 +1178,19 @@
                 setTutorMessage(getRandomQuote(LukasQuotes.rateAgain), "ให้กำลังใจ");
             }
 
+            recordActivity(currentCard, becameMastered);
             saveProgress();
             updateStats();
+
+            // Ein neuer Titel ist der Moment, den man herzeigen will - Lukas sagt es laut
+            const rankAfter = getRankInfo().current;
+            if (rankAfter.th !== rankBefore.th) {
+                setTutorMessage(
+                    `ยินดีด้วยครับคนดี! 🎉 ตอนนี้คุณเลื่อนขั้นเป็น "${rankAfter.emoji} ${rankAfter.th}" แล้วนะ ` +
+                    `เก่งขึ้นทุกวันเลย ผมภูมิใจมากๆ ครับ 💖`,
+                    "เลื่อนขั้นแล้ว! 🎉"
+                );
+            }
 
             // Next card after rating
             nextCard();
@@ -1056,8 +1328,191 @@
 
         // Update Progress Bar & Counters
         function updateStats() {
+            const rank = getRankInfo();
+            const diligence = getDiligence();
+
             document.getElementById('learnedCount').innerText = learnedSet.size;
             document.getElementById('totalCardsCount').innerText = cards.length;
+            document.getElementById('streakCount').innerText = computeStreak();
+
+            // Banner im Header
+            document.getElementById('rankEmoji').innerText = rank.current.emoji;
+            document.getElementById('rankTitle').innerText = rank.current.th;
+            document.getElementById('rankBar').style.width = `${rank.progress}%`;
+            document.getElementById('rankDiligence').innerText =
+                `${diligence.level.emoji} ${diligence.level.th}`;
+            document.getElementById('rankNext').innerText = rank.next
+                ? `อีก ${rank.remaining} ประโยค จะได้เป็น "${rank.next.emoji} ${rank.next.th}"`
+                : 'เก่งที่สุดแล้ว! เรียนครบทุกประโยค 🏆';
+
+            renderReport();
+        }
+
+        // ---- Fortschrittsbericht --------------------------------------------
+
+        function toggleReport() {
+            const modal = document.getElementById('reportModal');
+            const wasHidden = modal.classList.contains('hidden');
+            modal.classList.toggle('hidden');
+            if (wasHidden) renderReport();
+        }
+
+        function renderReport() {
+            const rank = getRankInfo();
+            const diligence = getDiligence();
+
+            document.getElementById('reportRankEmoji').innerText = rank.current.emoji;
+            document.getElementById('reportRankTitle').innerText = rank.current.th;
+            document.getElementById('reportRankDe').innerText = rank.current.de;
+            document.getElementById('reportRankBar').style.width = `${rank.progress}%`;
+            document.getElementById('reportRankNext').innerText = rank.next
+                ? `อีก ${rank.remaining} ประโยค จะได้เป็น "${rank.next.emoji} ${rank.next.th}"`
+                : 'เรียนครบทุกประโยคแล้ว เก่งที่สุดเลย! 🏆';
+
+            document.getElementById('reportDiligenceTag').innerText =
+                `${diligence.level.emoji} ${diligence.level.th}`;
+            document.getElementById('reportStreak').innerText = computeStreak();
+            document.getElementById('reportDaysActive').innerText = diligence.daysActive;
+            document.getElementById('reportWeekReviews').innerText = diligence.reviews;
+            document.getElementById('reportLearnedTotal').innerText =
+                `${learnedSet.size}/${cards.length}`;
+
+            renderWeekDots(diligence.week);
+            renderRecentList();
+        }
+
+        // Ein Punkt pro Tag: gefuellt heisst geuebt, damit Fleiss sichtbar wird
+        function renderWeekDots(week) {
+            const container = document.getElementById('reportWeekDots');
+            container.innerHTML = '';
+
+            week.forEach(day => {
+                const cell = document.createElement('div');
+                cell.className = 'flex-1 flex flex-col items-center gap-1';
+
+                const dot = day.count > 0
+                    ? 'bg-gradient-to-br from-amber-400 to-rose-500 text-white border-transparent'
+                    : 'bg-slate-100 text-slate-400 border-slate-200';
+                const todayRing = day.isToday ? 'ring-2 ring-rose-400 ring-offset-1' : '';
+
+                cell.innerHTML = `
+                    <div class="w-full aspect-square max-w-[38px] rounded-xl border flex items-center justify-center text-[11px] font-bold ${dot} ${todayRing}">
+                        ${day.count > 0 ? day.count : '–'}
+                    </div>
+                    <span class="text-[10px] font-medium ${day.isToday ? 'text-rose-600 font-bold' : 'text-slate-400'}">${day.label}</span>
+                `;
+                container.appendChild(cell);
+            });
+        }
+
+        // Zuletzt gemeisterte Saetze - die konkrete Antwort auf "was hast du gelernt?"
+        function renderRecentList() {
+            const container = document.getElementById('reportRecentList');
+            container.innerHTML = '';
+
+            const recent = learnHistory.slice(0, 8);
+
+            if (recent.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 px-3 text-slate-400">
+                        <div class="text-3xl mb-2">🌱</div>
+                        <div class="text-xs font-medium leading-relaxed">
+                            ยังไม่มีประโยคที่เรียนจบนะ<br>
+                            พลิกการ์ดแล้วกด "1 วัน" หรือ "3 วัน" ประโยคนั้นจะมาอยู่ตรงนี้ครับ
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            recent.forEach((entry, idx) => {
+                const card = cards.find(c => c.id === entry.id);
+                if (!card) return; // Satz nicht mehr im Kartenstapel
+
+                const item = document.createElement('div');
+                item.className = 'bg-emerald-50/60 border border-emerald-200 rounded-xl p-2.5 flex items-start gap-2.5';
+                item.innerHTML = `
+                    <span class="w-5 h-5 shrink-0 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">${idx + 1}</span>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-bold text-slate-800 leading-snug">${card.en}</div>
+                        <div class="text-[11px] text-rose-700 font-medium">${card.th}</div>
+                        <div class="text-[10px] text-emerald-700 font-semibold mt-0.5">✅ ${formatTimeAgo(entry.ts)}</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Bericht als Text, damit sie ihn Lukas per LINE schicken kann
+        function buildReportText() {
+            const rank = getRankInfo();
+            const diligence = getDiligence();
+            const lines = [
+                '📊 รายงานการเรียนภาษาอังกฤษของฉัน',
+                `⭐ ระดับ: ${rank.current.emoji} ${rank.current.th}`,
+                `💖 เรียนจบแล้ว: ${learnedSet.size}/${cards.length} ประโยค`,
+                `💪 ความขยัน: ${diligence.level.emoji} ${diligence.level.th} (ซ้อม ${diligence.daysActive} จาก 7 วัน)`,
+                `🔥 ซ้อมต่อเนื่อง: ${computeStreak()} วัน`,
+                `🔁 ซ้อมทั้งหมด 7 วันที่ผ่านมา: ${diligence.reviews} ครั้ง`
+            ];
+
+            const recent = learnHistory.slice(0, 5)
+                .map(entry => ({ entry, card: cards.find(c => c.id === entry.id) }))
+                .filter(row => row.card);
+
+            if (recent.length > 0) {
+                lines.push('', '✅ ประโยคที่เพิ่งเรียนล่าสุด:');
+                recent.forEach((row, idx) => {
+                    lines.push(`${idx + 1}. ${row.card.en} — ${row.card.th} (${formatTimeAgo(row.entry.ts)})`);
+                });
+            }
+
+            return lines.join('\n');
+        }
+
+        function copyReport() {
+            const label = document.getElementById('copyReportLabel');
+            const text = buildReportText();
+
+            const confirm = () => {
+                label.innerText = 'คัดลอกแล้ว! ไปวางในแชทเลย ✅';
+                setTimeout(() => {
+                    label.innerText = 'คัดลอกรายงานส่งให้ลูคัส';
+                }, 2500);
+            };
+
+            // In-App-Browser wie LINE erlauben die Clipboard-API oft nicht,
+            // darum der aeltere Weg als Rueckfallebene.
+            const fallbackCopy = () => {
+                const area = document.createElement('textarea');
+                area.value = text;
+                area.setAttribute('readonly', '');
+                area.style.position = 'fixed';
+                area.style.opacity = '0';
+                document.body.appendChild(area);
+                area.select();
+                let ok = false;
+                try {
+                    ok = document.execCommand('copy');
+                } catch (e) {
+                    ok = false;
+                }
+                document.body.removeChild(area);
+
+                if (ok) {
+                    confirm();
+                } else {
+                    // Kopieren unmoeglich: Lukas zeigt den Text zum Abschreiben
+                    toggleReport();
+                    setTutorMessage(text, "รายงานของคุณ 📊");
+                }
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(confirm).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
         }
 
         // Modal for all cards list
